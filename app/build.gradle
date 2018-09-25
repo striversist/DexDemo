@@ -26,3 +26,20 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
+
+task clearJar(type: Delete) {
+    delete 'libs/dynamic.jar'
+}
+
+task makeJar(type: org.gradle.api.tasks.bundling.Jar) {
+    // 指定生成的jar名
+    baseName 'dynamic'
+    // 从哪里打包class文件
+    from('build/intermediates/classes/debug/com/fs/dexdemo/dynamic/impl/')
+    // 打包到jar后的目录结构
+    into('com/fs/dexdemo/dynamic/impl/')
+    // 去掉不需要打包的目录和文件
+    exclude('test/', 'Dynamic.class', 'BuildConfig.class', 'R.class')
+    // 去掉R$开头的文件
+    exclude { it.name.startsWith('R$') }
+}
