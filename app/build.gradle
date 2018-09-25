@@ -45,12 +45,15 @@ task makeJar(type: org.gradle.api.tasks.bundling.Jar) {
 }
 makeJar.dependsOn(clearJar, build)
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+String sdkDir = properties.getProperty("sdk.dir")
 task makeDex() {
     doFirst {
         println 'makeDex'
         exec {
             workingDir "build/libs"
-            commandLine "/Users/aaron/Library/Android/sdk/build-tools/27.0.3/dx",   \
+            commandLine "${sdkDir}/build-tools/27.0.3/dx",   \
                 '--dex', '--output=dynamic_dex.jar', 'dynamic.jar'
         }
 
