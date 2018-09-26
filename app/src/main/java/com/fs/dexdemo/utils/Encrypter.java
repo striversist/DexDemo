@@ -12,7 +12,8 @@ public class Encrypter {
 
     public static final String USAGE = "usage: Encrypter " +
             "(" +
-            "-encrypt <classpath dir> <class 1> <class 2> ..." +
+            "-encrypt <output dir> <file 1> <file 2> ..." +
+            "-decrypt <output dir> <file 1> <file 2> ..." +
             ")";
 
     public static boolean TRACE = true;
@@ -24,15 +25,22 @@ public class Encrypter {
         if (args.length == 1)
             throw new IllegalArgumentException(USAGE);
 
-        if ("-encrypt".equals(args[0]) == false || args.length < 3)
+        if (args.length < 3)
             throw new IllegalArgumentException(USAGE);
 
         final File outputDirectory = new File(args[1]);
-
-        for (int i = 2; i < args.length; ++i) {
-            final File file = new File(args[i]);
-//            cryptFile(outputDirectory, file);
-            AESCrypt(outputDirectory, file);
+        if ("-encrypt".equals(args[0])) {
+            for (int i = 2; i < args.length; ++i) {
+                final File file = new File(args[i]);
+                AESEncrypt(outputDirectory, file);
+            }
+        } else if ("-decrypt".equals(args[0])) {
+            for (int i = 2; i < args.length; ++i) {
+                final File file = new File(args[i]);
+                AESDecrypt(outputDirectory, file);
+            }
+        } else {
+            throw new IllegalArgumentException(USAGE);
         }
     }
 
@@ -99,9 +107,15 @@ public class Encrypter {
         return buf1.toByteArray();
     }
 
-    private static void AESCrypt(File outputDirectory, File file) {
+    private static void AESEncrypt(File outputDirectory, File file) {
         String sourceFilePath = file.getAbsolutePath();
-        String destFilePath = outputDirectory.getAbsolutePath() + File.separator + file.getName();
+        String destFilePath = outputDirectory.getAbsolutePath() + File.separator + file.getName() + ".encrypted";
         sAESHelper.encryptFile(AES_KEY, sourceFilePath, destFilePath);
+    }
+
+    private static void AESDecrypt(File outputDirectory, File file) {
+        String sourceFilePath = file.getAbsolutePath();
+        String destFilePath = outputDirectory.getAbsolutePath() + File.separator + file.getName() + ".decrypted";
+        sAESHelper.decryptFile(AES_KEY, sourceFilePath, destFilePath);
     }
 }

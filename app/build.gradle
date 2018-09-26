@@ -53,7 +53,6 @@ properties.load(project.rootProject.file('local.properties').newDataInputStream(
 String sdkDir = properties.getProperty("sdk.dir")
 task makeDex() {
     doFirst {
-        println 'makeDex'
         exec {
             workingDir "build/libs"
             commandLine "${sdkDir}/build-tools/27.0.3/dx",   \
@@ -70,3 +69,15 @@ task makeDex() {
     }
 }
 makeDex.dependsOn(makeJar)
+
+task encrypt(type: JavaExec) {
+    classpath 'build/intermediates/classes/debug'
+    main = 'com.fs.dexdemo.utils.Encrypter'
+    args '-encrypt', 'build/libs', 'build/libs/dynamic_dex.jar'
+}
+
+task decrypt(type: JavaExec) {
+    classpath 'build/intermediates/classes/debug'
+    main = 'com.fs.dexdemo.utils.Encrypter'
+    args '-decrypt', 'build/libs', 'build/libs/dynamic_dex.jar.encrypted'
+}

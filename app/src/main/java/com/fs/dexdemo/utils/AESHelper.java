@@ -94,12 +94,16 @@ public class AESHelper {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } finally {
             try {
-                out.close();
+                if (out != null) {
+                    out.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
             try {
-                in.close();
+                if (in != null) {
+                    in.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
@@ -144,12 +148,16 @@ public class AESHelper {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } finally {
             try {
-                in.close();
+                if (in != null) {
+                    in.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
             try {
-                out.close();
+                if (out != null) {
+                    out.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }

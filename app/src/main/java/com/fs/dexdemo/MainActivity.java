@@ -9,7 +9,6 @@ import android.widget.Toast;
 import com.fs.dexdemo.dynamic.Dynamic;
 import com.fs.dexdemo.utils.AESHelper;
 import com.fs.dexdemo.utils.FileUtils;
-import com.fs.dexdemo.utils.LogUtil;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.io.File;
@@ -87,11 +86,9 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                LogUtil.d("aaa: here");
                 String sourceFile = "/sdcard/tmp/cat.jpg";
                 String destFile = "/sdcard/tmp/cat.encrypted.jpg";
                 sAESHelper.encryptFile(AES_KEY, sourceFile, destFile);
-                LogUtil.d("aaa: here");
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
