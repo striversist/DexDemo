@@ -1,4 +1,4 @@
-package com.fs.dexdemo;
+package com.fs.dexdemo.utils;
 
 import android.content.Context;
 import android.os.Environment;
