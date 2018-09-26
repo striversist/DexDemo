@@ -56,14 +56,14 @@ task makeDex() {
         exec {
             workingDir "build/libs"
             commandLine "${sdkDir}/build-tools/27.0.3/dx",   \
-                '--dex', '--output=dynamic_dex.jar', 'dynamic.jar'
+                '--dex', '--output=dynamic.dex', 'dynamic.jar'
         }
 
         // project.delete
-        // encrypt.execute()
+        encrypt.execute()
 
         copy {
-            from 'build/libs/dynamic_dex.jar'
+            from 'build/libs/dynamic.dex'
             into 'src/main/assets'
         }
     }
@@ -73,11 +73,11 @@ makeDex.dependsOn(makeJar)
 task encrypt(type: JavaExec) {
     classpath 'build/intermediates/classes/debug'
     main = 'com.fs.dexdemo.utils.Encrypter'
-    args '-encrypt', 'build/libs', 'build/libs/dynamic_dex.jar'
+    args '-encrypt', 'build/libs', 'build/libs/dynamic.dex'
 }
 
 task decrypt(type: JavaExec) {
     classpath 'build/intermediates/classes/debug'
     main = 'com.fs.dexdemo.utils.Encrypter'
-    args '-decrypt', 'build/libs', 'build/libs/dynamic_dex.jar.encrypted'
+    args '-decrypt', 'build/libs', 'build/libs/dynamic.dex.encrypted'
 }

@@ -59,12 +59,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadDexClass() {
         File cacheFile = FileUtils.getCacheDir(getApplicationContext());
-        String internalPath = cacheFile.getAbsolutePath() + File.separator + "dynamic_dex.jar";
+        String internalPath = cacheFile.getAbsolutePath() + File.separator + "dynamic.dex";
         File desFile = new File(internalPath);
         try {
             if (!desFile.exists()) {
                 desFile.createNewFile();
-                FileUtils.copyFiles(this, "dynamic_dex.jar", desFile);
+                FileUtils.copyFiles(this, "dynamic.dex", desFile);
             }
         } catch (IOException e) {
             e.printStackTrace();
