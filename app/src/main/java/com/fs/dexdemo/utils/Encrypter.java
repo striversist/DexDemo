@@ -17,6 +17,9 @@ public class Encrypter {
 
     public static boolean TRACE = true;
 
+    private static final String AES_KEY = "abcdefghabcdefgh";
+    private static AESHelper sAESHelper = new AESHelper();
+
     public static void main(final String[] args) throws Exception {
         if (args.length == 1)
             throw new IllegalArgumentException(USAGE);
@@ -28,7 +31,8 @@ public class Encrypter {
 
         for (int i = 2; i < args.length; ++i) {
             final File file = new File(args[i]);
-            cryptFile(outputDirectory, file);
+//            cryptFile(outputDirectory, file);
+            AESCrypt(outputDirectory, file);
         }
     }
 
@@ -95,4 +99,9 @@ public class Encrypter {
         return buf1.toByteArray();
     }
 
+    private static void AESCrypt(File outputDirectory, File file) {
+        String sourceFilePath = file.getAbsolutePath();
+        String destFilePath = outputDirectory.getAbsolutePath() + File.separator + file.getName();
+        sAESHelper.encryptFile(AES_KEY, sourceFilePath, destFilePath);
+    }
 }
