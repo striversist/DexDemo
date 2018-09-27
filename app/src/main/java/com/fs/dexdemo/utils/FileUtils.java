@@ -57,4 +57,11 @@ public class FileUtils {
             cache.mkdirs();
         return cache;
     }
+
+    public static File getInternalCacheDir(Context context) {
+        File cache = context.getCacheDir();
+        if (!cache.exists())
+            cache.mkdirs();
+        return cache;
+    }
 }

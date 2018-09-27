@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadDexClass() {
-        File cacheFile = FileUtils.getCacheDir(getApplicationContext());
+        File cacheFile = FileUtils.getInternalCacheDir(getApplicationContext());
         String internalPath = cacheFile.getAbsolutePath() + File.separator + "dynamic_dex.jar";
         File dexFile = new File(internalPath);
         try {
