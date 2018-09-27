@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.fs.dexdemo.dynamic.Dynamic;
 import com.fs.dexdemo.utils.AESHelper;
+import com.fs.dexdemo.utils.DexUtils;
 import com.fs.dexdemo.utils.FileUtils;
 import com.fs.dexdemo.utils.LogUtil;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -63,17 +64,22 @@ public class MainActivity extends AppCompatActivity {
     private void loadDexClass() {
         File cacheFile = FileUtils.getCacheDir(getApplicationContext());
         String internalPath = cacheFile.getAbsolutePath() + File.separator + "dynamic_dex.jar";
-        File desFile = new File(internalPath);
+        File dexFile = new File(internalPath);
         try {
-            if (!desFile.exists()) {
-                desFile.createNewFile();
-                FileUtils.copyFiles(this, "dynamic_dex.jar", desFile);
+            if (!dexFile.exists()) {
+                dexFile.createNewFile();
+                FileUtils.copyFiles(this, "dynamic_dex.jar", dexFile);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        showClassFromDex(desFile);
+        showClassFromDex(dexFile);
+        if (DexUtils.injectDexAtFirst(this, cacheFile.getAbsoluteFile(), dexFile)) {
+            Toast.makeText(this, "Dex inject success!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Dex inject failed!", Toast.LENGTH_SHORT).show();
+        }
 
         // 下面开始加载dex class
         DexClassLoader dexClassLoader = new DexClassLoader(internalPath, cacheFile.getAbsolutePath(), null, getClassLoader());
@@ -82,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
             Dynamic dynamic = (Dynamic) libClazz.newInstance();
             if (dynamic != null) {
                 Toast.makeText(this, dynamic.sayHello(), Toast.LENGTH_SHORT).show();
-//                dynamic.start(this);
+                dynamic.start(this);
             }
         } catch (Exception e) {
             e.printStackTrace();

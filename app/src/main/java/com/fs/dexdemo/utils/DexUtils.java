@@ -2,94 +2,83 @@ package com.fs.dexdemo.utils;
 
 import android.content.Context;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
-
+import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 
 import dalvik.system.DexClassLoader;
 
 public class DexUtils {
 
-    public static boolean injectDexAtFirst(Context context, String dexPath, String dexOptPath) {
+    public static boolean injectDexAtFirst(Context context, File optimizedDirectory, File... dexFiles) {
+        boolean result = true;
         try {
-            // 获取系统的dexElements
-            Object baseDexElements = getDexElements(getPathList(getPathClassLoader(context)));
-
-            // 获取patch的dexElements
-            DexClassLoader patchDexClassLoader = new DexClassLoader(dexPath, dexOptPath, dexPath, getPathClassLoader(context));
-            Object patchDexElements = getDexElements(getPathList(patchDexClassLoader));
-
-            // 组合最新的dexElements
-            Object allDexElements = combineArray(patchDexElements, baseDexElements);
-
-            // 将最新的dexElements添加到系统的classLoader中
-            Object pathList = getPathList(getPathClassLoader(context));
-
-            FieldUtils.writeField(pathList, "dexElements", allDexElements);
-        } catch (IllegalAccessException e) {
+            injectDexAtFirst(context.getClassLoader(), optimizedDirectory, dexFiles);
+        } catch (NoSuchFieldException e) {
+            result = false;
             e.printStackTrace();
-            return false;
+        } catch (NoSuchMethodException e) {
+            result = false;
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            result = false;
+            e.printStackTrace();
         }
-
-        return true;
+        return result;
     }
 
-    public static ClassLoader getPathClassLoader(Context context) {
-//        return DexUtils.class.getClassLoader();
-        return context.getClassLoader();
-    }
+    private static void injectDexAtFirst(ClassLoader classLoader, File optimizedDirectory, File... dexFiles) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessError, IllegalAccessException {
+        StringBuilder sb = new StringBuilder();
+        for (File file : dexFiles) {
+            sb.append(file.getAbsolutePath()).append(":");
+        }
+        //加载所有外部dex文件
+        DexClassLoader dexClassLoader = new DexClassLoader(sb.deleteCharAt(sb.length() - 1).toString(),
+                optimizedDirectory.getAbsolutePath(), null, ClassLoader.getSystemClassLoader());
+        //获取系统 dexElements
+        Object pathElements = getClassLoaderElements(classLoader);
+        //获取DexClassLoader dexElements
+        Object dexElements = getClassLoaderElements(dexClassLoader);
 
-    /**
-     * 反射调用getPathList方法，获取数据
-     *
-     * @param classLoader
-     * @return
-     * @throws ClassNotFoundException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     */
-    public static Object getPathList(ClassLoader classLoader) throws IllegalAccessException {
-        return FieldUtils.readField(classLoader, "pathList");
-    }
-
-    /**
-     * 反射调用pathList对象的dexElements数据
-     *
-     * @param pathList
-     * @return
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     */
-    public static Object getDexElements(Object pathList) throws IllegalAccessException {
-        LogUtil.d("Reflect To Get DexElements");
-        return FieldUtils.readField(pathList, "dexElements");
+        Field pathListField = ReflectUtil.findFiled(classLoader.getClass(), "pathList");
+        Object pathList = pathListField.get(classLoader);
+        Field dexElementsFiled = ReflectUtil.findFiled(pathList.getClass(), "dexElements");
+        //将系统与外部dexElements合并
+        Object arrayAppend = arrayAppend(dexElements, pathElements);
+        //修改系统 dexElements
+        dexElementsFiled.set(pathList, arrayAppend);
     }
 
     /**
-     * 拼接dexElements，将patch的dex插入到原来dex的头部
-     *
-     * @param firstElement
-     * @param secondElement
-     * @return
+     * 将所有Array类型的数据按顺序合并成一个Array数据
      */
-    public static Object combineArray(Object firstElement, Object secondElement) {
-        LogUtil.d("Combine DexElements");
+    private static Object arrayAppend(Object... elements) {
+        int length = 0;
+        for (Object element : elements) {
+            length += Array.getLength(element);
+        }
+        Object array = Array.newInstance(elements[0].getClass().getComponentType(), length);
 
-        // 取得一个数组的Class对象, 如果对象是数组，getClass只能返回数组类型，而getComponentType可以返回数组的实际类型
-        Class objTypeClass = firstElement.getClass().getComponentType();
-
-        int firstArrayLen = Array.getLength(firstElement);
-        int secondArrayLen = Array.getLength(secondElement);
-        int allArrayLen = firstArrayLen + secondArrayLen;
-
-        Object allObject = Array.newInstance(objTypeClass, allArrayLen);
-        for (int i = 0; i < allArrayLen; i++) {
-            if (i < firstArrayLen) {
-                Array.set(allObject, i, Array.get(firstElement, i));
-            } else {
-                Array.set(allObject, i, Array.get(secondElement, i - firstArrayLen));
+        for (int i = 0, j = 0, k = 0, elementLength = Array.getLength(elements[k]); i < length; i++) {
+            Array.set(array, i, Array.get(elements[k], i - j));
+            if (i - j == elementLength - 1) {
+                j += elementLength;
+                k++;
+                if (k < elements.length) {
+                    elementLength = Array.getLength(elements[k]);
+                }
             }
         }
-        return allObject;
+        return array;
+    }
+
+    /**
+     * 获取ClassLoader 中 dexElements 成员变量
+     */
+    private static Object getClassLoaderElements(ClassLoader classLoader) throws NoSuchMethodException, IllegalAccessException {
+        Field pathListField = ReflectUtil.findFiled(classLoader.getClass(), "pathList");
+        Object pathList = pathListField.get(classLoader);
+        Field dexElementsFiled = ReflectUtil.findFiled(pathList.getClass(), "dexElements");
+        return dexElementsFiled.get(pathList);
     }
 }
