@@ -28,6 +28,7 @@ dependencies {
 
     implementation 'io.reactivex:rxandroid:1.2.1'
     implementation 'com.tbruyelle.rxpermissions:rxpermissions:0.9.4@aar'
+    implementation 'org.apache.commons:commons-lang3:3.6'
 }
 
 task clearJar(type: Delete) {
@@ -56,14 +57,14 @@ task makeDex() {
         exec {
             workingDir "build/libs"
             commandLine "${sdkDir}/build-tools/27.0.3/dx",   \
-                '--dex', '--output=dynamic.dex', 'dynamic.jar'
+                '--dex', '--output=dynamic_dex.jar', 'dynamic.jar'
         }
 
         // project.delete
         encrypt.execute()
 
         copy {
-            from 'build/libs/dynamic.dex'
+            from 'build/libs/dynamic_dex.jar'
             into 'src/main/assets'
         }
     }
@@ -73,11 +74,11 @@ makeDex.dependsOn(makeJar)
 task encrypt(type: JavaExec) {
     classpath 'build/intermediates/classes/debug'
     main = 'com.fs.dexdemo.utils.Encrypter'
-    args '-encrypt', 'build/libs', 'build/libs/dynamic.dex'
+    args '-encrypt', 'build/libs', 'build/libs/dynamic_dex.jar'
 }
 
 task decrypt(type: JavaExec) {
     classpath 'build/intermediates/classes/debug'
     main = 'com.fs.dexdemo.utils.Encrypter'
-    args '-decrypt', 'build/libs', 'build/libs/dynamic.dex.encrypted'
+    args '-decrypt', 'build/libs', 'build/libs/dynamic_dex.jar.encrypted'
 }

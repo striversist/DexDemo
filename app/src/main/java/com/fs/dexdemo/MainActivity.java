@@ -9,12 +9,15 @@ import android.widget.Toast;
 import com.fs.dexdemo.dynamic.Dynamic;
 import com.fs.dexdemo.utils.AESHelper;
 import com.fs.dexdemo.utils.FileUtils;
+import com.fs.dexdemo.utils.LogUtil;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 
 import dalvik.system.DexClassLoader;
+import dalvik.system.DexFile;
 import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
@@ -59,16 +62,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadDexClass() {
         File cacheFile = FileUtils.getCacheDir(getApplicationContext());
-        String internalPath = cacheFile.getAbsolutePath() + File.separator + "dynamic.dex";
+        String internalPath = cacheFile.getAbsolutePath() + File.separator + "dynamic_dex.jar";
         File desFile = new File(internalPath);
         try {
             if (!desFile.exists()) {
                 desFile.createNewFile();
-                FileUtils.copyFiles(this, "dynamic.dex", desFile);
+                FileUtils.copyFiles(this, "dynamic_dex.jar", desFile);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        showClassFromDex(desFile);
 
         // 下面开始加载dex class
         DexClassLoader dexClassLoader = new DexClassLoader(internalPath, cacheFile.getAbsolutePath(), null, getClassLoader());
@@ -77,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             Dynamic dynamic = (Dynamic) libClazz.newInstance();
             if (dynamic != null) {
                 Toast.makeText(this, dynamic.sayHello(), Toast.LENGTH_SHORT).show();
-                dynamic.start(this);
+//                dynamic.start(this);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -116,5 +121,20 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         }).start();
+    }
+
+    private void showClassFromDex(File dexFile) {
+        String path = dexFile.getAbsolutePath();
+        try {
+            DexFile dx = DexFile.loadDex(path, File.createTempFile("opt", "dex",
+                    getCacheDir()).getPath(), 0);
+            // Print all classes in the DexFile
+            for (Enumeration<String> classNames = dx.entries(); classNames.hasMoreElements(); ) {
+                String className = classNames.nextElement();
+                LogUtil.d("class: " + className);
+            }
+        } catch (IOException e) {
+            LogUtil.d("Error opening " + path);
+        }
     }
 }
