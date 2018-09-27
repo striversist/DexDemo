@@ -75,8 +75,10 @@ public class MainActivity extends AppCompatActivity {
         try {
             Class libClazz = dexClassLoader.loadClass("com.fs.dexdemo.dynamic.impl.DynamicImpl");
             Dynamic dynamic = (Dynamic) libClazz.newInstance();
-            if (dynamic != null)
-                Toast.makeText(this, dynamic.sayHello(), Toast.LENGTH_LONG).show();
+            if (dynamic != null) {
+                Toast.makeText(this, dynamic.sayHello(), Toast.LENGTH_SHORT).show();
+                dynamic.start(this);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
