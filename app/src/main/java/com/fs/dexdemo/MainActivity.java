@@ -82,7 +82,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // 下面开始加载dex class
-        DexClassLoader dexClassLoader = new DexClassLoader(internalPath, cacheFile.getAbsolutePath(), null, getClassLoader());
+//        DexClassLoader dexClassLoader = new DexClassLoader(internalPath, cacheFile.getAbsolutePath(), null, getClassLoader());
+        ClassLoader dexClassLoader = getClassLoader();
         try {
             Class libClazz = dexClassLoader.loadClass("com.fs.dexdemo.dynamic.impl.DynamicImpl");
             Dynamic dynamic = (Dynamic) libClazz.newInstance();
